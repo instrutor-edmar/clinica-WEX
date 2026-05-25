@@ -9,6 +9,8 @@ docker run --name postgres-clinica \
 #confira se o docker foi criado
 docker ps
 
+#para inicar o docker que entrou em modo sleep
+docker start postgres-clinica  
 
 select * from usuarios
 select * from roles
