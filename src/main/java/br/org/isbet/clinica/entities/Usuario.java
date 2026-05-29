@@ -1,17 +1,22 @@
 package br.org.isbet.clinica.entities;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
+import jakarta.persistence.ManyToMany;
 import br.org.isbet.clinica.dtos.UsuarioDTO;
 
 @Entity(name = "usuarios")
@@ -27,7 +32,16 @@ public class Usuario implements UserDetails {
     @Schema(description = "Senha do usuário")
     private String password;
 
+    /*Lista de papéis que uma usuário pode ter*/
+    @ManyToMany(fetch = FetchType.EAGER)
+    @JoinTable(
+        name = "usuarios-roles",
+        joinColumns = @JoinColumn(name = "idUsuario"),
+        inverseJoinColumns = @JoinColumn(name = "idRoles")
+    )
     private List<Role> roles = new ArrayList<>();
+
+    
 
     public Usuario(){
         super();
@@ -45,17 +59,23 @@ public class Usuario implements UserDetails {
         this.password = usuarioDTO.password();
     }
 
+    @Override
     public String getUsername(){
         return username;
     }
 
+    @Override
     public String getPassword(){
         return password;
     }
 
-    public List<Role> getAuthorities(){
+    public List<Role> getRoles(){
         return roles;
     }
 
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities(){
+        return roles;
+    }
 
 }
