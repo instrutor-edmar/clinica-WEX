@@ -17,7 +17,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
-import br.org.isbet.clinica.dtos.UsuarioDTO;
+import br.org.isbet.clinica.dtos.LoginDTO;
 
 @Entity(name = "usuarios")
 public class Usuario implements UserDetails {
@@ -54,7 +54,7 @@ public class Usuario implements UserDetails {
         this.password = password;
     }
 
-    public Usuario(UsuarioDTO usuarioDTO){
+    public Usuario(LoginDTO usuarioDTO){
         this.username = usuarioDTO.username();
         this.password = usuarioDTO.password();
     }
