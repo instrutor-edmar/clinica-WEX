@@ -2,10 +2,12 @@ package br.org.isbet.clinica.entities;
 
 import br.org.isbet.clinica.entities.Endereco;
 import br.org.isbet.clinica.entities.Usuario;
+import br.org.isbet.clinica.dtos.MedicoFormDTO;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embedded;
+import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
@@ -14,7 +16,8 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToOne;
 
-
+@Schema(description = "Representação do paciente no sistema")
+@Entity(name = "medicos")
 public class Medico {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -48,62 +51,68 @@ public class Medico {
         super();
     }
 
-    public Medico (
-        Long id, 
-        Usuario usuario,
-        String nome,
-        String crm,
-        Endereco endereco,
-        String telefone,
-        EspecialidadeMedico especialidade){
-            this.id=id;
-            this.usuario=usuario;
-            this.nome=nome;
-            this.crm=crm;
-            this.endereco=endereco;
-            this.telefone=telefone;
-            this.especialidade=especialidade;
-            this.ativo=false;
-    }
+	public Medico(MedicoFormDTO medicoForm) {
+		super();
+		this.nome = medicoForm.nome();
+		this.crm = medicoForm.crm();
+		this.endereco = medicoForm.endereco() != null ? new Endereco(medicoForm.endereco()) : null;
+        this.telefone = medicoForm.telefone();
+        this.especialidade = medicoForm.especialidade();
+        this.ativo = false;
+	}
 
     public void validarMedico(){
         this.ativo=true;
     }
-
+    public Long getId() {
+		return id;
+	}
+	public void setId(Long id) {
+		this.id = id;
+	}
     public String getNome(){
         return nome;
     }
-
-    public String getCRM(){
-        return crm;
-    }
-
-    public Long getId(){
-        return id;
-    }
-
-     public Usuario getUsuario(){
+    public void setNome(String nome) {
+		this.nome = nome;
+	}
+    public Usuario getUsuario(){
         return usuario;
     }
-
+    public void setUsuario(Usuario usuario) {
+        this.usuario = usuario;
+    }
     public String getEmail(){
         return usuario !=null ? usuario.getUsername(): null;
     }
-
+    public String getCRM(){
+        return crm;
+    }
+    public void setCrm(String crm) {
+		this.crm = crm;
+	}
     public String getTelefone(){
         return telefone;
     }
-
+    public void setTelefone(String telefone) {
+		this.telefone = telefone;
+	}
     public Endereco getEndereco(){
         return endereco;
     }
-
+    public void setEndereco(Endereco endereco) { 
+        this.endereco = endereco; 
+    }
     public EspecialidadeMedico getEspecialidade(){
         return especialidade;
     }
-
+    public void setEspecialidade(EspecialidadeMedico especialidade) {
+		this.especialidade = especialidade;
+	}
     public Boolean getAtivo(){
         return ativo;
     }
-
+    public void setAtivo(Boolean status) { 
+        this.ativo = status; 
+    }
 }

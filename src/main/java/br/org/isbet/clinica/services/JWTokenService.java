@@ -17,7 +17,7 @@ import java.time.Instant;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.List;
-//import java.util.Optional;
+import java.util.Optional;
 
 import br.org.isbet.clinica.entities.Usuario;
 
@@ -45,18 +45,18 @@ public class JWTokenService {
                     .withClaim("roles", roles)
                     .withExpiresAt(dataExpiracao());
 
-            // Adiciona ID do Paciente se for paciente
-            // if (roles.contains("ROLE_PACIENTE")) {
-            //     /*Optional<Paciente>*/ Paciente paciente = pacienteRepository.findByUsuario(usuario);
-            //     paciente.ifPresent(p -> jwtBuilder.withClaim("pacienteId", p.getId()));
-            // }
-
+            //Adiciona ID do Paciente se for paciente
             if (roles.contains("ROLE_PACIENTE")) {
-            Paciente paciente = pacienteRepository.findByUsuario(usuario);
-            if (paciente != null) {
-                jwtBuilder.withClaim("pacienteId", paciente.getId());
+                Optional<Paciente> paciente = pacienteRepository.findByUsuario(usuario);
+                paciente.ifPresent(p -> jwtBuilder.withClaim("pacienteId", p.getId()));
             }
-        }
+
+            // if (roles.contains("ROLE_PACIENTE")) {
+            // Paciente paciente = pacienteRepository.findByUsuario(usuario);
+            // if (paciente != null) {
+            //     jwtBuilder.withClaim("pacienteId", paciente.getId());
+            // }
+        // }
 
             // Adiciona ID do Médico se for médico
                   // if (roles.contains("ROLE_MEDICO")) {

@@ -45,13 +45,6 @@ public class Usuario implements UserDetails {
         super();
     }
 
-    // public Usuario(Long id, String username, String password){
-    //     super();
-    //     this.id = id;
-    //     this.username = username;
-    //     this.password = password;
-    // }
-
     public Usuario(LoginDTO usuarioDTO){
         this.username = usuarioDTO.username();
         this.password = usuarioDTO.password();
@@ -83,5 +76,4 @@ public class Usuario implements UserDetails {
     public Collection<? extends GrantedAuthority> getAuthorities(){
         return roles;
     }
-
 }
