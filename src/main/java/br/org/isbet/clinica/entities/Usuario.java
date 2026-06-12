@@ -32,7 +32,7 @@ public class Usuario implements UserDetails {
     @Schema(description = "Senha do usuário")
     private String password;
 
-    /*Lista de papéis que uma usuário pode ter*/
+    /*Lista de papéis que um usuário pode ter*/
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
         name = "usuarios-roles",
@@ -41,38 +41,44 @@ public class Usuario implements UserDetails {
     )
     private List<Role> roles = new ArrayList<>();
 
-    
-
     public Usuario(){
         super();
     }
 
-    public Usuario(Long id, String username, String password){
-        super();
-        this.id = id;
-        this.username = username;
-        this.password = password;
-    }
+    // public Usuario(Long id, String username, String password){
+    //     super();
+    //     this.id = id;
+    //     this.username = username;
+    //     this.password = password;
+    // }
 
     public Usuario(LoginDTO usuarioDTO){
         this.username = usuarioDTO.username();
         this.password = usuarioDTO.password();
     }
-
+    public void setId(Long id) {
+        this.id = id;
+    }
     @Override
     public String getUsername(){
         return username;
     }
-
+    public void setUsername(String username) {
+        this.username = username;
+    }
     @Override
     public String getPassword(){
         return password;
     }
-
+    public void setPassword(String password) {
+        this.password = password;
+    }
     public List<Role> getRoles(){
         return roles;
     }
-
+    public void adicionarRole(Role role) {
+        this.roles.add(role);
+    }
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities(){
         return roles;

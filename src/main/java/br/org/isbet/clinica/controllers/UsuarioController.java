@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class UsuarioController {
     private Authentication manager;
     private UsuarioService usuarioservice;
-    private JWTokenService tokenservice;
+    //private JWTokenService tokenservice;
     
 
     // public UsuarioController(

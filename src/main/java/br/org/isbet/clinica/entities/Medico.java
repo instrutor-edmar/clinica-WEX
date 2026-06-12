@@ -2,6 +2,7 @@ package br.org.isbet.clinica.entities;
 
 import br.org.isbet.clinica.entities.Endereco;
 import br.org.isbet.clinica.entities.Usuario;
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embedded;
@@ -17,25 +18,31 @@ import jakarta.persistence.OneToOne;
 public class Medico {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Schema(description = "Identificador único do médico", example = "1")
     private Long id;
-
-    @Column(nullable = false, unique = true)
-    private String crm;
     
+    @Schema(description = "Nome completo do médico", example = "Dra. Ana Paula Ribeiro")
     private String nome;
-    
-    @Embedded
-    private Endereco endereco;
-    
-    private String telefone;
-    private Boolean ativo;
-
-    @Enumerated(EnumType.STRING)
-    private EspecialidadeMedico especialidade;
 
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "usuario_id", referencedColumnName = "id")
     private Usuario usuario;
+
+    @Column(nullable = false, unique = true)
+    @Schema(description = "Número do CRM do médico", example = "123456")
+    private String crm;
+
+    @Embedded
+    private Endereco endereco;
+    
+    @Enumerated(EnumType.STRING)
+    @Schema(description = "Especialidade do médico", example = "CARDIOLOGIA")
+    private EspecialidadeMedico especialidade;
+    
+    @Schema(description = "Telefone de contato", example = "(71) 99999-8888")
+    private String telefone;
+           
+    private Boolean ativo;
 
     public Medico(){
         super();
