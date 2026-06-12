@@ -1,13 +1,9 @@
 package br.org.isbet.clinica.entities;
 
 import br.org.isbet.clinica.dtos.PacienteFormDTO;
-import br.org.isbet.clinica.entities.Endereco;
-import br.org.isbet.clinica.entities.Usuario;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embedded;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;

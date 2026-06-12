@@ -1,7 +1,5 @@
 package br.org.isbet.clinica.entities;
 
-import br.org.isbet.clinica.entities.Endereco;
-import br.org.isbet.clinica.entities.Usuario;
 import br.org.isbet.clinica.dtos.MedicoFormDTO;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.CascadeType;

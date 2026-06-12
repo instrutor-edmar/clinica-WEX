@@ -1,5 +1,150 @@
 package br.org.isbet.clinica.services;
 
-public class MedicoService {
+import java.util.List;
 
+import br.org.isbet.clinica.dtos.MedicoDTO;
+import br.org.isbet.clinica.dtos.LoginDTO;
+import br.org.isbet.clinica.dtos.MedicoFormDTO;
+import br.org.isbet.clinica.dtos.MedicoUpdateDTO;
+import br.org.isbet.clinica.entities.Medico;
+import br.org.isbet.clinica.entities.Role;
+import br.org.isbet.clinica.entities.Usuario;
+import br.org.isbet.clinica.repositories.RoleRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
+import br.org.isbet.clinica.repositories.MedicoRepository;
+import org.springframework.transaction.annotation.Transactional;
+
+@Service
+public class MedicoService {
+    private MedicoRepository medicoRepository;
+    private RoleRepository roleRepository;
+    private PasswordEncoder passwordEncoder;
+
+    public MedicoService(
+        MedicoRepository medicoRepository, 
+        RoleRepository roleRepository,
+        PasswordEncoder passwordEncoder
+    ){
+            this.medicoRepository = medicoRepository;
+            this.roleRepository = roleRepository;
+            this.passwordEncoder = passwordEncoder;
+    } 
+
+    public MedicoDTO cadastrarMedico(MedicoFormDTO dados){
+        var usuario = new Usuario(
+            new LoginDTO(
+                dados.username(), 
+                passwordEncoder.encode(
+                    dados.password()
+                )
+            )
+        );
+        Role medicoRole = roleRepository.findByRole("ROLE_MEDICO");
+        if(medicoRole == null){
+            throw new RuntimeException("ROLE_MEDICO não encontrada");
+        }
+        usuario.adicionarRole(medicoRole);
+        Medico medico = new Medico(dados);
+        medico.setUsuario(usuario);
+        medico.setAtivo(false);
+        medicoRepository.save(medico);
+
+        return new MedicoDTO(medico);
+    }
+
+	public Page<MedicoDTO> getAllMedicos(Pageable pageable, Authentication authentication) {
+        boolean isAdmin = authentication.getAuthorities().stream()
+                .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN") || a.getAuthority().equals("ADMIN"));
+
+        if (isAdmin) {
+            return this.medicoRepository.findAll(pageable).map(MedicoDTO::new);
+        } else {
+            return this.medicoRepository.findAllByAtivoTrue(pageable).map(MedicoDTO::new);
+        }
+    }
+
+    public MedicoDTO getMedicoById(Long id) {
+        Medico medicoBanco = this.medicoRepository.findById(id).orElse(null);
+        if (medicoBanco == null || Boolean.FALSE.equals(medicoBanco.getAtivo())) {
+            return null;
+        }
+        return new MedicoDTO(medicoBanco);
+    }
+
+
+    @Transactional
+    public MedicoDTO ativarMedico(Long id) {
+        Medico medico = medicoRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Médico não encontrado"));
+        
+        if (Boolean.TRUE.equals(medico.getAtivo())) {
+            throw new IllegalArgumentException("Médico já está ativo");
+        }
+
+        medico.setAtivo(true);
+        medicoRepository.save(medico);
+        return new MedicoDTO(medico);
+    }
+
+	public List<MedicoDTO> getMedicoByNome(String nome) {
+        if (nome == null || nome.isBlank()) {
+            return null;
+        }
+        List<MedicoDTO> medicos = this.medicoRepository.findByNomeIlike(nome)
+                .stream()
+                .map(MedicoDTO::new)
+                .toList();
+        if (!medicos.isEmpty()) {
+            return medicos;
+        } else {
+            return null;
+        }
+    }
+
+    @Transactional
+	public MedicoDTO atualizarMedico(Long id, MedicoUpdateDTO dados) {
+		Medico medicoBanco = this.medicoRepository.findById(id).orElse(null);
+        if (medicoBanco == null || dados == null || Boolean.FALSE.equals(medicoBanco.getAtivo())) {
+            return null;
+        }
+        if (dados.nome() != null) {
+            medicoBanco.setNome(dados.nome());
+        }
+        if (dados.endereco() != null) {
+            var endereco = medicoBanco.getEndereco();
+            var dadosEndereco = dados.endereco();
+
+            if (dadosEndereco.logradouro() != null) endereco.setLogradouro(dadosEndereco.logradouro());
+            if (dadosEndereco.numero() != null) endereco.setNumero(dadosEndereco.numero());
+            if (dadosEndereco.complemento() != null) endereco.setComplemento(dadosEndereco.complemento());
+            if (dadosEndereco.cidade() != null) endereco.setCidade(dadosEndereco.cidade());
+            if (dadosEndereco.cep() != null) endereco.setCep(dadosEndereco.cep());
+            if (dadosEndereco.estado() != null) endereco.setEstado(dadosEndereco.estado());
+        }
+        if (dados.telefone() != null) {
+            medicoBanco.setTelefone(dados.telefone());
+        }
+        if (dados.password() != null && !dados.password().isBlank()) {
+            medicoBanco.getUsuario().setPassword(passwordEncoder.encode(dados.password()));
+        }
+
+        this.medicoRepository.save(medicoBanco);
+		return new MedicoDTO(medicoBanco);
+	}
+	
+	public MedicoDTO desativarMedico(Long id) {
+        Medico medicoBanco = this.medicoRepository.findById(id).orElse(null);
+
+		if (medicoBanco != null) {
+            Medico medico = medicoBanco;
+            medico.setAtivo(false);
+            this.medicoRepository.save(medico);
+			return new MedicoDTO(medicoBanco);
+		}
+		return null;
+	}
 }
