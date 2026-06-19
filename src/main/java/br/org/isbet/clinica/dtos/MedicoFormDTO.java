@@ -33,7 +33,7 @@ public record MedicoFormDTO(
                     @Schema(description = "Endereço do médico")
                     @NotNull(message = "O endereço não pode ser nulo")
                     @Valid
-                    EnderecoDTO endereco,
+                    EnderecoFormDTO endereco,
 
                     @NotBlank(message = "O telefone não pode ser nulo")
                     @Schema(description = "Telefone de contato", example = "(71) 99999-8888")

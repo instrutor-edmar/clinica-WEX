@@ -1,17 +1,8 @@
 package br.org.isbet.clinica.entities;
 
 import br.org.isbet.clinica.dtos.PacienteFormDTO;
-import jakarta.persistence.CascadeType;
-import jakarta.persistence.Column;
-import jakarta.persistence.Embedded;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.OneToOne;
-import jakarta.persistence.Entity;
 import io.swagger.v3.oas.annotations.media.Schema;
-
+import jakarta.persistence.*;
 
 @Schema(description = "Representação do paciente no sistema")
 @Entity(name = "pacientes")
@@ -20,7 +11,7 @@ public class Paciente {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Schema(description = "Identificador único do paciente", example = "1")
     private Long id;
-  
+
     @Schema(description = "Nome completo do paciente", example = "Mariana  Ribeiro")
     private String nome;
 
@@ -34,33 +25,29 @@ public class Paciente {
     
     @Embedded
     private Endereco endereco;
-    
+
     @Schema(description = "Telefone de contato", example = "(71) 99999-8888")
     private String telefone;
-    
-    @Column(nullable=false)
+
+    @Column(nullable = false)
     private Boolean ativo;
 
-    public Paciente(){
+    public Paciente() {
         super();
     }
 
-    public Paciente (
-        Long id, 
-        Usuario usuario,
-        String nome,
-        String cpf,
-        Endereco endereco,
-        String telefone){
-            this.id=id;
-            this.usuario=usuario;
-            this.nome=nome;
-            this.cpf=cpf;
-            this.endereco=endereco;
-            this.telefone=telefone;
-            this.ativo = true;
+    public Paciente(Long id, Usuario usuario, String nome, String cpf, Endereco endereco, String telefone) {
+        super();
+        this.id = id;
+        this.usuario = usuario;
+        this.nome = nome;
+        this.cpf = cpf;
+        this.endereco = endereco;
+        this.telefone = telefone;
+        this.ativo = true;
     }
 
+    //fazer no dia 12/06 lembrar de fazer todos os dtos
     public Paciente(PacienteFormDTO pacienteForm) {
         super();
         this.nome = pacienteForm.nome();
@@ -76,44 +63,36 @@ public class Paciente {
     public void setId(Long id) {
         this.id = id;
     }
-    public String getNome(){
-        return nome;
-    }
-    public void setNome(String nome) {
-        this.nome = nome;
-    }
+
     public Usuario getUsuario() {
         return usuario;
     }
     public void setUsuario(Usuario usuario) {
         this.usuario = usuario;
     }
-    public String getCPF(){
-        return cpf;
-    }
     public String getUsername() {
         return usuario != null ? usuario.getUsername() : null;
+    }
+    public String getNome() {
+        return nome;
+    }
+    public void setNome(String nome) {
+        this.nome = nome;
+    }
+    public String getCpf() {
+        return cpf;
     }
     public void setCpf(String cpf) {
         this.cpf = cpf;
     }
-    public String getTelefone(){
+    public String getTelefone() {
         return telefone;
     }
     public void setTelefone(String telefone) {
         this.telefone = telefone;
     }
-    public Endereco getEndereco(){
-        return endereco;
-    }
-     public void setEndereco(Endereco endereco) { 
-        this.endereco = endereco; 
-    }
-    public Boolean getAtivo(){
-        return ativo;
-    }
-    public void setAtivo(Boolean status) { 
-        this.ativo = status; 
-    }
-
+    public Boolean getAtivo() { return ativo; }
+    public void setAtivo(Boolean status) { this.ativo = status; }
+    public Endereco getEndereco() { return endereco; }
+    public void setEndereco(Endereco endereco) { this.endereco = endereco; }
 }

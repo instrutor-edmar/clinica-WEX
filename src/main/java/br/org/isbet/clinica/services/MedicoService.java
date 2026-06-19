@@ -20,41 +20,15 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class MedicoService {
-    private MedicoRepository medicoRepository;
-    private RoleRepository roleRepository;
+	private final MedicoRepository medicoRepository;
+    private final RoleRepository roleRepository;
     private PasswordEncoder passwordEncoder;
 
-    public MedicoService(
-        MedicoRepository medicoRepository, 
-        RoleRepository roleRepository,
-        PasswordEncoder passwordEncoder
-    ){
-            this.medicoRepository = medicoRepository;
-            this.roleRepository = roleRepository;
-            this.passwordEncoder = passwordEncoder;
-    } 
-
-    public MedicoDTO cadastrarMedico(MedicoFormDTO dados){
-        var usuario = new Usuario(
-            new LoginDTO(
-                dados.username(), 
-                passwordEncoder.encode(
-                    dados.password()
-                )
-            )
-        );
-        Role medicoRole = roleRepository.findByRole("ROLE_MEDICO");
-        if(medicoRole == null){
-            throw new RuntimeException("ROLE_MEDICO não encontrada");
-        }
-        usuario.adicionarRole(medicoRole);
-        Medico medico = new Medico(dados);
-        medico.setUsuario(usuario);
-        medico.setAtivo(false);
-        medicoRepository.save(medico);
-
-        return new MedicoDTO(medico);
-    }
+	public MedicoService(MedicoRepository medicoRepository, RoleRepository roleRepository, PasswordEncoder passwordEncoder) {
+		this.medicoRepository = medicoRepository;
+        this.roleRepository = roleRepository;
+        this.passwordEncoder = passwordEncoder;
+	}
 
 	public Page<MedicoDTO> getAllMedicos(Pageable pageable, Authentication authentication) {
         boolean isAdmin = authentication.getAuthorities().stream()
@@ -75,6 +49,22 @@ public class MedicoService {
         return new MedicoDTO(medicoBanco);
     }
 
+    @Transactional
+	public MedicoDTO createMedico(MedicoFormDTO dados) {
+        Usuario usuario = new Usuario(new LoginDTO(dados.username(), passwordEncoder.encode(dados.password())));
+        
+        Role roleMedico = roleRepository.findByRole("ROLE_MEDICO");
+        if (roleMedico == null) {
+            throw new RuntimeException("Role ROLE_MEDICO não encontrada. Verifique o DataInitializer.");
+        }
+        usuario.adicionarRole(roleMedico);
+
+        Medico medico = new Medico(dados);
+        medico.setUsuario(usuario);
+        medico.setAtivo(false);
+        medicoRepository.save(medico);
+        return new MedicoDTO(medico);
+	}
 
     @Transactional
     public MedicoDTO ativarMedico(Long id) {

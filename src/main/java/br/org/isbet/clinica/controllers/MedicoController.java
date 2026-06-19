@@ -12,7 +12,7 @@ import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -32,112 +32,109 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 
-
-
-
 @RestController
 @RequestMapping("/medicos")
-@Tag(name = "Médicos", description = "Endpoint para gerenciar médicos")
-public class MedicoController {  
-    private MedicoService medicoService;
-    
-    public MedicoController(MedicoService medicoService){
-        this.medicoService = medicoService;
-    }
+@Tag(name = "Médicos", description = "Endpoints para gerenciar médicos")
+public class MedicoController {
+	private final MedicoService medicoService;
+	
+	public MedicoController(MedicoService medicoService) {
+		this.medicoService = medicoService;
+	}
 
-    @Operation(summary = "Cadastro de médicos", description = "Cadastrar novo médico")
+	@Operation(summary = "Listar médicos", description = "Retorna todos os médicos disponíveis")
     @ApiResponses({
-        @ApiResponse(responseCode = "201", description = "Médico cadastrado!"),
-        @ApiResponse(responseCode = "400", description = "Dados inválidos!"),
-        @ApiResponse(responseCode = "500", description = "Erro de Servidor!")
+            @ApiResponse(responseCode = "200", description = "Lista de médicos paginada (pode ser vazia)"),
+            @ApiResponse(responseCode = "500", description = "Erro interno no servidor")
     })
-    @PostMapping("/register")
-    @Transactional
-    public ResponseEntity<MedicoDTO> cadastrarMedico(@RequestBody @Valid MedicoFormDTO medicoDTO){
-        var medico = medicoService.cadastrarMedico(medicoDTO);
-        return ResponseEntity.status(201).body(medico);
-    }
+	@GetMapping("/listar")
+    public ResponseEntity<Page<MedicoDTO>> getAllMedicos(
+            @ParameterObject
+            @Parameter(description = "Parâmetros de paginação e ordenação")
+            @PageableDefault(size = Integer.MAX_VALUE, sort = "nome", direction = Sort.Direction.ASC) Pageable pageable,
+            Authentication authentication) {
+        return ResponseEntity.ok(this.medicoService.getAllMedicos(pageable, authentication));
+	}
 
-    @Operation(summary = "Deletar de médico", description = "Deletar médico")
+    @Operation(summary = "Cadastrar médico", description = "Cadastra um novo médico no sistema")
     @ApiResponses({
-        @ApiResponse(responseCode = "200", description = "Médico deletado!"),
-        @ApiResponse(responseCode = "400", description = "Dados inválidos!"),
-        @ApiResponse(responseCode = "500", description = "Erro de Servidor!")
+            @ApiResponse(responseCode = "201", description = "Médico cadastrado com sucesso"),
+            @ApiResponse(responseCode = "400", description = "Dados inválidos"),
+            @ApiResponse(responseCode = "500", description = "Erro interno no servidor")
     })
-    @DeleteMapping("/{id}")
-    @Transactional
-    public ResponseEntity<MedicoDTO> deletarMedico(@PathVariable Long id){
-        var medico = this.medicoService.desativarMedico(id);
-        if(medico != null){
-            return ResponseEntity.ok(medico);
-        }
-        return ResponseEntity.notFound().build();
-    }
+	@ApiResponse(responseCode = "201", description = "Médico cadastrado com sucesso")
+	@PostMapping("/register")
+	@Transactional
+	public ResponseEntity<MedicoDTO> createMedico(@RequestBody @Valid MedicoFormDTO medico) {
+		return ResponseEntity.status(201).body(this.medicoService.createMedico(medico));
+	}
 
-    @Operation(summary = "Atualizar médico", description = "Deletar médico")
+    @Operation(summary = "Ativar médico", description = "Ativa um médico previamente cadastrado")
     @ApiResponses({
-        @ApiResponse(responseCode = "200", description = "Médico deletado!"),
-        @ApiResponse(responseCode = "400", description = "Dados inválidos!"),
-        @ApiResponse(responseCode = "500", description = "Erro de Servidor!")
+            @ApiResponse(responseCode = "200", description = "Médico ativado com sucesso"),
+            @ApiResponse(responseCode = "404", description = "Médico não encontrado"),
+            @ApiResponse(responseCode = "400", description = "Médico já está ativo")
     })
-    @PutMapping("/{id}")
-    @Transactional
-    public ResponseEntity<MedicoDTO> atualizarMedico(
-                                @PathVariable 
-                                Long id, 
-                                @RequestBody @Valid 
-                                MedicoUpdateDTO medico){
-        var dadosMedicoAtualizar = this.medicoService.atualizarMedico(id, medico);
-        if(medico != null){
-            return ResponseEntity.ok(dadosMedicoAtualizar);
-        }
-        return ResponseEntity.notFound().build();
-    }
-
-    @Operation(summary = "Ativar médico", description = "Ativar médico")
-    @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/{id}/ativar")
+    @PreAuthorize("hasRole('ADMIN')")
     @Transactional
-    public ResponseEntity<MedicoDTO> ativarMedico(@PathVariable Long id){
+    public ResponseEntity<MedicoDTO> ativarMedico(@PathVariable Long id) {
         return ResponseEntity.ok(this.medicoService.ativarMedico(id));
     }
+	
+	@Operation(summary = "Buscar médico por nome", description = "Busca médicos pelo nome")
+	@ApiResponses({
+	        @ApiResponse(responseCode = "200", description = "Lista de médicos encontrados (pode ser vazia)"),
+            @ApiResponse(responseCode = "500", description = "Erro interno no servidor")
+    })
+	@GetMapping("/buscarPorNome")
+	public ResponseEntity<List<MedicoDTO>> getMedicoByNome(@RequestParam String nome) {
+		 List<MedicoDTO> medicos = this.medicoService.getMedicoByNome(nome);
+         if (medicos == null) {
+             return ResponseEntity.ok(List.of());
+         }
+		 return ResponseEntity.ok(medicos);
+	}
 
-    @Operation(summary = "Buscar médico por nome", description = "Buscar médico por nome")
-    @GetMapping("/buscarPorNome")
-    @Transactional
-    public ResponseEntity <List<MedicoDTO>> buscarMedicoPorNome(@RequestParam String nome){
-        List<MedicoDTO> medicos = this.medicoService.getMedicoByNome(nome);
-        if(medicos == null){
-            return ResponseEntity.ok(List.of());
-        }
-        return ResponseEntity.ok(medicos);
-    }
-
-    @Operation(summary = "Buscar médico por id", description = "Buscar médico por id")
+    @Operation(summary = "Buscar médico por id", description = "Busca médicos pelo id")
     @GetMapping("/{id}")
-    @Transactional
-    public ResponseEntity <MedicoDTO> buscarMedicoPorId(@PathVariable Long id){
-        var medico = this.medicoService.getMedicoById(id);
-        if(medico == null){
+    public ResponseEntity<MedicoDTO> getMedicoById(@PathVariable Long id) {
+        MedicoDTO buscarMedico = this.medicoService.getMedicoById(id);
+        if (buscarMedico == null) {
             return ResponseEntity.notFound().build();
         }
-        return ResponseEntity.ok(medico);
+        return ResponseEntity.ok(buscarMedico);
     }
 
-    @Operation(summary = "Listar Médicos", description = "Listar médicos")
+	@Operation(summary = "Atualizar médico", description = "Atualiza os dados de um médico")
     @ApiResponses({
-        @ApiResponse(responseCode = "200", description = "Usuários listados!"),
-        @ApiResponse(responseCode = "500", description = "Erro de Servidor!")
+            @ApiResponse(responseCode = "200", description = "Dados do médico atualizado com sucesso"),
+            @ApiResponse(responseCode = "404", description = "Médico não encontrado"),
+            @ApiResponse(responseCode = "500", description = "Erro interno no servidor")
     })
-    @GetMapping("/listar")
-    @Transactional
-    public ResponseEntity<Page<MedicoDTO>> listarMedico(
-        @ParameterObject
-        @Parameter(description = "Parametro de paginação")
-        @PageableDefault(size = Integer.MAX_VALUE, sort = "nome", direction = Sort.Direction.ASC) 
-        Pageable pagina,
-        Authentication authentication
-    ){
-        return ResponseEntity.ok(this.medicoService.getAllMedicos(pagina, authentication));
-    }
+	@PutMapping("/{id}")
+	@Transactional
+	public ResponseEntity<MedicoDTO> atualizarMedico(@PathVariable Long id, @RequestBody @Valid MedicoUpdateDTO medico) {
+		MedicoDTO medicoAtualizado = this.medicoService.atualizarMedico(id, medico);
+        if (medicoAtualizado == null) {
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok(medicoAtualizado);
+	}
+	
+	@Operation(summary = "Deletar médico", description = "Deleta um médico por ID")
+	@ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Dados do médico deletado com sucesso"),
+            @ApiResponse(responseCode = "404", description = "Médico não encontrado"),
+            @ApiResponse(responseCode = "500", description = "Erro interno no servidor")
+    })
+    @PatchMapping("/{id}")
+	@Transactional
+	public ResponseEntity<MedicoDTO> desativarMedico(@PathVariable Long id) {
+		MedicoDTO medicoDeletado = this.medicoService.desativarMedico(id);
+        if (medicoDeletado == null) {
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok(medicoDeletado);
+	}
 }

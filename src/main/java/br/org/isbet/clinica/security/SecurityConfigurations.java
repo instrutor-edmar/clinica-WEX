@@ -90,10 +90,44 @@ public class SecurityConfigurations {
         return new BCryptPasswordEncoder();
     }
 
+    // @Bean
+    // public CorsConfigurationSource corsConfigurationSource() {
+    //     CorsConfiguration configuration = new CorsConfiguration();
+        
+    //     // Usando padrões de origem para aceitar o localhost e também as URLs do Codespaces
+    //     configuration.setAllowedOriginPatterns(Arrays.asList(
+    //         "http://localhost:5173", 
+    //         "http://127.0.0.1:5173",
+    //         "https://*.github.dev",          // Aceita subdomínios do Codespaces padrão
+    //         "https://*.app.github.dev"      // Novo padrão de URL do Codespaces
+    //     ));
+        
+    //     configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS", "HEAD"));
+    //     configuration.setAllowedHeaders(List.of("*"));
+    //     configuration.setAllowCredentials(true);
+        
+    //     UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+    //     source.registerCorsConfiguration("/**", configuration);
+    //     return source;
+    // }
+
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
+        
+        // COMO ESTAMOS NO CODESPACES (DESENVOLVIMENTO):
+        // Usamos 'AllowedOriginPatterns' com "*" para liberar qualquer origem,
+        // já que as URLs do Codespaces mudam constantemente.
         configuration.setAllowedOriginPatterns(Arrays.asList("*"));
+        
+        // Se preferir manter mais restrito, descomente as linhas abaixo e comente a de cima:
+        // configuration.setAllowedOriginPatterns(Arrays.asList(
+        //     "http://localhost:5173", 
+        //     "http://127.0.0.1:5173",
+        //     "https://*.github.dev",
+        //     "https://*.app.github.dev"
+        // ));
+
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS", "HEAD"));
         
         // Importante: O Swagger precisa enviar os cabeçalhos de Authorization (Bearer Token)

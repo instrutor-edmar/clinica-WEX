@@ -1,44 +1,42 @@
 package br.org.isbet.clinica.entities;
 
 import org.springframework.security.core.GrantedAuthority;
+import br.org.isbet.clinica.dtos.RoleDTO;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 
-import br.org.isbet.clinica.dtos.RoleDTO;
-
 @Entity(name = "roles")
-public class Role implements GrantedAuthority{
-
+public class Role implements GrantedAuthority {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String role;
 
-    public Role(){
+    public Role() {
         super();
     }
 
-    public Role(RoleDTO roleDTO){
-        this.role = roleDTO.role();
+    public Role(RoleDTO roleDto) {
+        this.role = roleDto.role();
     }
-
-    public Long getId(){
+    
+    public Long getId() {
         return id;
     }
-    public void setId(Long id){
+    public void setId(Long id) {
         this.id = id;
     }
-    public String getRole(){
+    public String getRole() {
         return role;
     }
-    public void setRole(String role){
+    public void setRole(String role) {
         this.role = role;
     }
     @Override
-    public String getAuthority(){
+    public String getAuthority() {
         return role;
     }
 }

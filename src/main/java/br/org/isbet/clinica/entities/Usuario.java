@@ -1,24 +1,16 @@
 package br.org.isbet.clinica.entities;
 
+import br.org.isbet.clinica.dtos.LoginDTO;
+import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.persistence.*;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.userdetails.UserDetails;
-
-import io.swagger.v3.oas.annotations.media.Schema;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.JoinTable;
-import jakarta.persistence.ManyToMany;
-import br.org.isbet.clinica.dtos.LoginDTO;
-
+@Schema(description = "Representação do usuário no sistema")
 @Entity(name = "usuarios")
 public class Usuario implements UserDetails {
     @Id
@@ -26,54 +18,57 @@ public class Usuario implements UserDetails {
     private Long id;
 
     @Column(unique = true)
-    @Schema(description = "E-mail de usuário", example = "usuario@email.com")
+    @Schema(description = "E-mail do usuário", example = "mariana.ribeiro@email.com")
     private String username;
 
-    @Schema(description = "Senha do usuário")
+    @Schema(description = "Senha do usuário", example = "123456")
     private String password;
-
-    /*Lista de papéis que um usuário pode ter*/
+    
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
-        name = "usuarios-roles",
-        joinColumns = @JoinColumn(name = "idUsuario"),
-        inverseJoinColumns = @JoinColumn(name = "idRoles")
+            name = "usuarios_roles", 
+            joinColumns = @JoinColumn(name = "idUsuarios"), 
+            inverseJoinColumns = @JoinColumn(name = "idRoles")
     )
-    private List<Role> roles = new ArrayList<>();
+    private List<Role> roles= new ArrayList<Role>();
 
-    public Usuario(){
+    public Usuario() {
         super();
     }
 
-    public Usuario(LoginDTO usuarioDTO){
-        this.username = usuarioDTO.username();
-        this.password = usuarioDTO.password();
+    public Usuario(LoginDTO dto) {
+        this.username = dto.username();
+        this.password = dto.password();
+    }
+
+    public Long getId() {
+        return id;
     }
     public void setId(Long id) {
         this.id = id;
     }
     @Override
-    public String getUsername(){
-        return username;
-    }
-    public void setUsername(String username) {
-        this.username = username;
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        return roles;
     }
     @Override
-    public String getPassword(){
+    public String getPassword() {
         return password;
     }
     public void setPassword(String password) {
         this.password = password;
     }
-    public List<Role> getRoles(){
-        return roles;
+    @Override
+    public String getUsername() { return username; }
+
+    public void setUsername(String username) {
+        this.username = username;
     }
     public void adicionarRole(Role role) {
         this.roles.add(role);
     }
-    @Override
-    public Collection<? extends GrantedAuthority> getAuthorities(){
+
+    public List<Role> getRoles() {
         return roles;
     }
 }

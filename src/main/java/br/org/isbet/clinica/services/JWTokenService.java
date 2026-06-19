@@ -45,25 +45,13 @@ public class JWTokenService {
                     .withClaim("roles", roles)
                     .withExpiresAt(dataExpiracao());
 
-            //Adiciona ID do Paciente se for paciente
+            // Adiciona ID do Paciente se for paciente
             if (roles.contains("ROLE_PACIENTE")) {
                 Optional<Paciente> paciente = pacienteRepository.findByUsuario(usuario);
                 paciente.ifPresent(p -> jwtBuilder.withClaim("pacienteId", p.getId()));
             }
 
-            // if (roles.contains("ROLE_PACIENTE")) {
-            // Paciente paciente = pacienteRepository.findByUsuario(usuario);
-            // if (paciente != null) {
-            //     jwtBuilder.withClaim("pacienteId", paciente.getId());
-            // }
-        // }
-
             // Adiciona ID do Médico se for médico
-                  // if (roles.contains("ROLE_MEDICO")) {
-            //     Optional<Medico> medico = medicoRepository.findByUsuario(usuario);
-            //     medico.ifPresent(p -> jwtBuilder.withClaim("medicoId", p.getId()));
-            // }
-
             if (roles.contains("ROLE_MEDICO")) {
                 Medico medico = medicoRepository.findByUsuarioUsername(usuario.getUsername());
                 if (medico != null) {

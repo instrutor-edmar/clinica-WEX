@@ -35,7 +35,7 @@ public record MedicoDTO(
         this(medico.getId(),
                 medico.getNome(),
                 medico.getUsuario().getUsername(),/**apenas o email do usuário sem a senha*/
-                medico.getCRM(),
+                medico.getCrm(),
                 medico.getEndereco(),
                 medico.getTelefone(),
                 medico.getAtivo(),

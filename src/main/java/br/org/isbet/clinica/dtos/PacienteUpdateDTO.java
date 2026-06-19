@@ -18,5 +18,5 @@ public record PacienteUpdateDTO(
         String telefone,
 
         @Schema(description = "Endereço do paciente (opcional)")
-        EnderecoDTO endereco) {
+        EnderecoFormDTO endereco) {
 }

@@ -25,7 +25,7 @@ public record PacienteFormDTO(
         String cpf,
 
         @Schema(description = "Endereço do paciente")
-        EnderecoDTO endereco,
+        EnderecoFormDTO endereco,
 
         @NotBlank(message = "O telefone não pode ser nulo")
         @Schema(description = "Telefone de contato", example = "(71) 99999-8888")
